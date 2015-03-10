@@ -89,11 +89,11 @@
             this.tbx_Title = new System.Windows.Forms.TextBox();
             this.l_Title = new System.Windows.Forms.Label();
             this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.label_version = new System.Windows.Forms.Label();
             this.button_exec_push = new System.Windows.Forms.Button();
-            this.listView1 = new System.Windows.Forms.ListView();
-            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.textBox_inputstream2 = new System.Windows.Forms.TextBox();
+            this.label21 = new System.Windows.Forms.Label();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.panel1.SuspendLayout();
             this.groupBox_reencode.SuspendLayout();
             this.tabControl1.SuspendLayout();
@@ -106,7 +106,7 @@
             // 
             // button_exec
             // 
-            this.button_exec.Location = new System.Drawing.Point(7, 299);
+            this.button_exec.Location = new System.Drawing.Point(7, 338);
             this.button_exec.Name = "button_exec";
             this.button_exec.Size = new System.Drawing.Size(226, 23);
             this.button_exec.TabIndex = 15;
@@ -136,7 +136,7 @@
             // label_exPort
             // 
             this.label_exPort.AutoSize = true;
-            this.label_exPort.Location = new System.Drawing.Point(6, 239);
+            this.label_exPort.Location = new System.Drawing.Point(9, 281);
             this.label_exPort.Name = "label_exPort";
             this.label_exPort.Size = new System.Drawing.Size(57, 12);
             this.label_exPort.TabIndex = 3;
@@ -154,14 +154,14 @@
             // 
             // textBox_exPort
             // 
-            this.textBox_exPort.Location = new System.Drawing.Point(71, 237);
+            this.textBox_exPort.Location = new System.Drawing.Point(74, 279);
             this.textBox_exPort.Name = "textBox_exPort";
             this.textBox_exPort.Size = new System.Drawing.Size(57, 19);
             this.textBox_exPort.TabIndex = 14;
             // 
             // button_disconnect
             // 
-            this.button_disconnect.Location = new System.Drawing.Point(7, 328);
+            this.button_disconnect.Location = new System.Drawing.Point(7, 367);
             this.button_disconnect.Name = "button_disconnect";
             this.button_disconnect.Size = new System.Drawing.Size(463, 23);
             this.button_disconnect.TabIndex = 16;
@@ -188,7 +188,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(6, 68);
+            this.label2.Location = new System.Drawing.Point(9, 110);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(79, 12);
             this.label2.TabIndex = 10;
@@ -197,7 +197,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(135, 68);
+            this.label3.Location = new System.Drawing.Point(138, 110);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(29, 12);
             this.label3.TabIndex = 11;
@@ -206,7 +206,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(292, 68);
+            this.label4.Location = new System.Drawing.Point(295, 110);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(29, 12);
             this.label4.TabIndex = 12;
@@ -214,7 +214,7 @@
             // 
             // textBox_videorate
             // 
-            this.textBox_videorate.Location = new System.Drawing.Point(170, 65);
+            this.textBox_videorate.Location = new System.Drawing.Point(173, 107);
             this.textBox_videorate.Name = "textBox_videorate";
             this.textBox_videorate.Size = new System.Drawing.Size(60, 19);
             this.textBox_videorate.TabIndex = 4;
@@ -222,7 +222,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(237, 68);
+            this.label5.Location = new System.Drawing.Point(240, 110);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(29, 12);
             this.label5.TabIndex = 14;
@@ -231,7 +231,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(393, 68);
+            this.label6.Location = new System.Drawing.Point(396, 110);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(29, 12);
             this.label6.TabIndex = 15;
@@ -239,7 +239,7 @@
             // 
             // textBox_audiorate
             // 
-            this.textBox_audiorate.Location = new System.Drawing.Point(327, 65);
+            this.textBox_audiorate.Location = new System.Drawing.Point(330, 107);
             this.textBox_audiorate.Name = "textBox_audiorate";
             this.textBox_audiorate.Size = new System.Drawing.Size(60, 19);
             this.textBox_audiorate.TabIndex = 5;
@@ -249,17 +249,17 @@
             this.textBox_log.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_log.Location = new System.Drawing.Point(14, 379);
+            this.textBox_log.Location = new System.Drawing.Point(14, 410);
             this.textBox_log.Multiline = true;
             this.textBox_log.Name = "textBox_log";
             this.textBox_log.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_log.Size = new System.Drawing.Size(811, 83);
+            this.textBox_log.Size = new System.Drawing.Size(456, 181);
             this.textBox_log.TabIndex = 17;
             // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(12, 364);
+            this.label7.Location = new System.Drawing.Point(12, 393);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(23, 12);
             this.label7.TabIndex = 18;
@@ -303,7 +303,7 @@
             this.panel1.Controls.Add(this.radioButton_reencode_2);
             this.panel1.Controls.Add(this.label8);
             this.panel1.Controls.Add(this.radioButton_reencode_1);
-            this.panel1.Location = new System.Drawing.Point(6, 90);
+            this.panel1.Location = new System.Drawing.Point(9, 132);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(200, 25);
             this.panel1.TabIndex = 22;
@@ -325,7 +325,7 @@
             this.groupBox_reencode.Controls.Add(this.label10);
             this.groupBox_reencode.Controls.Add(this.label9);
             this.groupBox_reencode.Enabled = false;
-            this.groupBox_reencode.Location = new System.Drawing.Point(6, 121);
+            this.groupBox_reencode.Location = new System.Drawing.Point(9, 163);
             this.groupBox_reencode.Name = "groupBox_reencode";
             this.groupBox_reencode.Size = new System.Drawing.Size(449, 110);
             this.groupBox_reencode.TabIndex = 23;
@@ -451,7 +451,7 @@
             // label18
             // 
             this.label18.AutoSize = true;
-            this.label18.Location = new System.Drawing.Point(212, 97);
+            this.label18.Location = new System.Drawing.Point(215, 139);
             this.label18.Name = "label18";
             this.label18.Size = new System.Drawing.Size(136, 12);
             this.label18.TabIndex = 26;
@@ -466,11 +466,14 @@
             this.tabControl1.Location = new System.Drawing.Point(7, 3);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(471, 290);
+            this.tabControl1.Size = new System.Drawing.Size(471, 329);
             this.tabControl1.TabIndex = 27;
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.checkBox1);
+            this.tabPage1.Controls.Add(this.textBox_inputstream2);
+            this.tabPage1.Controls.Add(this.label21);
             this.tabPage1.Controls.Add(this.textBox_pushAddr);
             this.tabPage1.Controls.Add(this.label19);
             this.tabPage1.Controls.Add(this.label_ffmpegPath);
@@ -493,14 +496,14 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(463, 264);
+            this.tabPage1.Size = new System.Drawing.Size(463, 303);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "基本設定";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
             // textBox_pushAddr
             // 
-            this.textBox_pushAddr.Location = new System.Drawing.Point(228, 236);
+            this.textBox_pushAddr.Location = new System.Drawing.Point(231, 278);
             this.textBox_pushAddr.Name = "textBox_pushAddr";
             this.textBox_pushAddr.Size = new System.Drawing.Size(225, 19);
             this.textBox_pushAddr.TabIndex = 28;
@@ -508,7 +511,7 @@
             // label19
             // 
             this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(139, 239);
+            this.label19.Location = new System.Drawing.Point(142, 281);
             this.label19.Name = "label19";
             this.label19.Size = new System.Drawing.Size(83, 12);
             this.label19.TabIndex = 27;
@@ -522,7 +525,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(463, 264);
+            this.tabPage2.Size = new System.Drawing.Size(463, 303);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "上級者向け";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -604,7 +607,7 @@
             this.tabPage4.Location = new System.Drawing.Point(4, 22);
             this.tabPage4.Name = "tabPage4";
             this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage4.Size = new System.Drawing.Size(463, 264);
+            this.tabPage4.Size = new System.Drawing.Size(463, 303);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "配信内容";
             this.tabPage4.UseVisualStyleBackColor = true;
@@ -696,25 +699,14 @@
             // 
             // tabPage3
             // 
-            this.tabPage3.Controls.Add(this.checkBox1);
             this.tabPage3.Controls.Add(this.label_version);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(463, 264);
+            this.tabPage3.Size = new System.Drawing.Size(463, 303);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "バージョン情報";
             this.tabPage3.UseVisualStyleBackColor = true;
-            // 
-            // checkBox1
-            // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(33, 85);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(83, 16);
-            this.checkBox1.TabIndex = 1;
-            this.checkBox1.Text = "change_flag";
-            this.checkBox1.UseVisualStyleBackColor = true;
             // 
             // label_version
             // 
@@ -727,7 +719,7 @@
             // 
             // button_exec_push
             // 
-            this.button_exec_push.Location = new System.Drawing.Point(244, 299);
+            this.button_exec_push.Location = new System.Drawing.Point(244, 338);
             this.button_exec_push.Name = "button_exec_push";
             this.button_exec_push.Size = new System.Drawing.Size(226, 23);
             this.button_exec_push.TabIndex = 28;
@@ -735,22 +727,38 @@
             this.button_exec_push.UseVisualStyleBackColor = true;
             this.button_exec_push.Click += new System.EventHandler(this.button_exec_Click);
             // 
-            // listView1
+            // textBox_inputstream2
             // 
-            this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader1});
-            this.listView1.Location = new System.Drawing.Point(485, 25);
-            this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(340, 326);
-            this.listView1.TabIndex = 29;
-            this.listView1.UseCompatibleStateImageBehavior = false;
+            this.textBox_inputstream2.Location = new System.Drawing.Point(85, 60);
+            this.textBox_inputstream2.Name = "textBox_inputstream2";
+            this.textBox_inputstream2.Size = new System.Drawing.Size(371, 19);
+            this.textBox_inputstream2.TabIndex = 29;
+            // 
+            // label21
+            // 
+            this.label21.AutoSize = true;
+            this.label21.Location = new System.Drawing.Point(6, 63);
+            this.label21.Name = "label21";
+            this.label21.Size = new System.Drawing.Size(79, 12);
+            this.label21.TabIndex = 30;
+            this.label21.Text = "入力ストリーム2";
+            // 
+            // checkBox1
+            // 
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(11, 85);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(109, 16);
+            this.checkBox1.TabIndex = 31;
+            this.checkBox1.Text = "ストリーム切り替え";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(837, 474);
-            this.Controls.Add(this.listView1);
+            this.ClientSize = new System.Drawing.Size(482, 603);
             this.Controls.Add(this.button_exec_push);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.label7);
@@ -758,7 +766,7 @@
             this.Controls.Add(this.button_exec);
             this.Controls.Add(this.button_disconnect);
             this.Name = "MainForm";
-            this.Text = "Stream to MMSH";
+            this.Text = "Stream to MMSH for POC";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.panel1.ResumeLayout(false);
@@ -846,9 +854,9 @@
         private System.Windows.Forms.Button button_exec_push;
         private System.Windows.Forms.TextBox textBox_pushAddr;
         private System.Windows.Forms.Label label19;
+        private System.Windows.Forms.TextBox textBox_inputstream2;
+        private System.Windows.Forms.Label label21;
         private System.Windows.Forms.CheckBox checkBox1;
-        private System.Windows.Forms.ListView listView1;
-        private System.Windows.Forms.ColumnHeader columnHeader1;
     }
 }
 

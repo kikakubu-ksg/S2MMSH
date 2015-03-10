@@ -786,10 +786,10 @@ namespace S2MMSH
                                         Console.WriteLine("ASF header registered.");
                                         asfData.asf_status = ASF_STATUS.ASF_STATUS_SET_HEADER;
 
-                                        this.BeginInvoke(new Action<String>(delegate(String str) { this.logoutput("ASFヘッダを登録しました。"); }), new object[] { "" });
+                                        this.BeginInvoke(new Action<String>(delegate(String str) { this.logoutput("#1:ASFヘッダを登録しました。"); }), new object[] { "" });
                                         if (push_mode)
                                         {
-                                            this.BeginInvoke(new Action<String>(delegate(String str) { this.logoutput("PUSH接続を開始します。"); }), new object[] { "" });
+                                            this.BeginInvoke(new Action<String>(delegate(String str) { this.logoutput("#1:PUSH接続を開始します。"); }), new object[] { "" });
                                             // PUSHサーバに接続
                                             // クライアントソケット作成
                                             // host:port取得
@@ -819,7 +819,7 @@ namespace S2MMSH
                                             }
                                             if (ipaddress == null)
                                             {
-                                                this.BeginInvoke(new Action<String>(delegate(String str) { this.logoutput("接続先アドレスが不正です。"); }), new object[] { "" });
+                                                this.BeginInvoke(new Action<String>(delegate(String str) { this.logoutput("#1:接続先アドレスが不正です。"); }), new object[] { "" });
                                                 break;
                                             }
                                             IPEndPoint RHost = new IPEndPoint(ipaddress, port);
@@ -859,16 +859,16 @@ namespace S2MMSH
                                                 Console.WriteLine("{0} Error code: {1}.", ex.Message, ex.ErrorCode);
                                                 throw ex;
                                             }
-                                            String msg = "接続しました。";
+                                            String msg = "#1:接続しました。";
 
                                             try
                                             {
-                                                msg = "接続しました。[" + mClient.RemoteEndPoint.ToString() + "]";
+                                                msg = "#1:接続しました。[" + mClient.RemoteEndPoint.ToString() + "]";
                                             }
                                             catch
                                             {
                                             }
-                                            this.BeginInvoke(new Action<String>(delegate(String str) { this.logoutput(msg); }), new object[] { "" });
+                                            this.BeginInvoke(new Action<String>(delegate(String str) { this.logoutput("#1:" + msg); }), new object[] { "" });
                                             String message = Encoding.ASCII.GetString(buffer, 0, recvLen);
                                             Console.Write("httprequest:" + message);
 
@@ -968,7 +968,7 @@ namespace S2MMSH
                                             {
 
                                                 Console.WriteLine("{0} Error code: {1}.", ex.Message, ex.ErrorCode);
-                                                this.BeginInvoke(new Action<String>(delegate(String str) { this.logoutput(ex.Message); }), new object[] { "" });
+                                                this.BeginInvoke(new Action<String>(delegate(String str) { this.logoutput("#1" + ex.Message); }), new object[] { "" });
                                                 asfData.mmsh_status = MMSH_STATUS.MMSH_STATUS_NULL;
                                             }
                                         }
@@ -979,13 +979,13 @@ namespace S2MMSH
                                     }
                                     else // 予期せぬヘッダ
                                     {
-                                        Console.WriteLine("unknown header: {0}", (char)buf[1]);
+                                        Console.WriteLine("#1:unknown header: {0}", (char)buf[1]);
                                     }
 
                                 }
                                 else {
                                     //EOF
-                                    this.BeginInvoke(new Action<String>(delegate(String str) { this.logoutput("入力がありません。配信を終了します。"); }), new object[] { "" });
+                                    this.BeginInvoke(new Action<String>(delegate(String str) { this.logoutput("#1:入力がありません。配信を終了します。"); }), new object[] { "" });
                                         
                                     break; 
                                 }
@@ -1005,7 +1005,7 @@ namespace S2MMSH
                             //    "エラー",
                             //    MessageBoxButtons.OK,
                             //    MessageBoxIcon.Error);
-                            this.BeginInvoke(new Action<String>(delegate(String str) { this.logoutput(exx.Message); }), new object[] { "" });
+                            this.BeginInvoke(new Action<String>(delegate(String str) { this.logoutput("#1:" + exx.Message); }), new object[] { "" });
                                     
                             ProcessInitialize();
                             
@@ -1028,7 +1028,7 @@ namespace S2MMSH
                             pm.process2.SynchronizingObject = this;
                             //イベントハンドラの追加
                             pm.process2.Exited += new EventHandler(p_Exited2);
-                            pm.process2.ErrorDataReceived += PrintErrorData;
+                            pm.process2.ErrorDataReceived += PrintErrorData2;
                             //pm.process.ErrorDataReceived += new DataReceivedEventHandler(NetErrorDataHandler);
                             //プロセスが終了したときに Exited イベントを発生させる
                             pm.process2.EnableRaisingEvents = true;
@@ -1039,14 +1039,61 @@ namespace S2MMSH
                             // " -v quiet -i tcp://127.0.0.1:6665 -c copy -f asf_stream -";
                             ProcessStartInfo startInfo = new ProcessStartInfo();
                             startInfo.FileName = this.textBox_ffmpegPath.Text;
-                            
-                            //startInfo.Arguments = " -v quiet -i tcp://127.0.0.1:6665 -c copy -f asf_stream -";
-                            //startInfo.Arguments = " -v quiet -i rtsp://184.72.239.149/vod/mp4:BigBuckBunny_115k.mov -c copy -f asf_stream -";
-                            //startInfo.Arguments = " -v error -i mmsh://win.global.playstream.com/showcase/mathtv/trig_4.5_350k.wmv -c copy -f asf_stream -";
-                            //startInfo.Arguments = " -v quiet -i mmsh://218.228.167.141:8888 -c copy -f asf_stream -";
-                            //startInfo.Arguments = " -v error -rtbufsize 10MB -f dshow -i video=\"USB 2.0 UVC 0.3M Webcam\":audio=\"マイク (Realtek High Definition Au\" -threads 0 -r 15 -s 512x384 -sws_flags lanczos -pix_fmt yuv420p -maxrate 256k -bufsize 560k -acodec libmp3lame -ar 44100 -ab 32k -ac 2 -vol 256 -vcodec  libx264 -preset fast -map 0:1 -map 0:0 -f asf_stream -";
-                            //startInfo.Arguments = " -v error -i mmsh://win.global.playstream.com/showcase/mathtv/trig_4.5_350k.wmv -threads 0 -r 15 -s 512x384 -sws_flags lanczos -pix_fmt yuv420p -maxrate 256k -bufsize 560k -acodec libmp3lame -ar 44100 -ab 32k -ac 2 -vol 256 -vcodec  libx264 -preset fast -f asf_stream -";
-                            startInfo.Arguments = " -v error -i mmsh://win.global.playstream.com/showcase/mathtv/trig_4.5_350k.wmv -r 15 -s 512x384 -acodec pcm_s16le -vcodec yuv4 -f asf_stream -";
+                            if (this.radioButton_ffmpegcom_1.Checked)
+                            {
+                                startInfo.Arguments = this.textBox_ffmpegcom.Text;
+                            }
+                            else
+                            {
+                                string url = this.textBox_inputstream2.Text;
+                                url = System.Text.RegularExpressions.Regex.Replace(
+                                    url,
+                                    @"^mms://",
+                                    "mmsh://");
+                                url = System.Text.RegularExpressions.Regex.Replace(
+                                   url,
+                                   @"^http://",
+                                   "mmsh://");
+                                if (this.radioButton_reencode_1.Checked == false)
+                                {
+                                    startInfo.Arguments = String.Format(" -v error -i {0} -c copy -f asf_stream -", url);
+                                }
+                                else
+                                {
+                                    int width = 0;
+                                    int height = 0;
+                                    int bitrate_v = 0;
+                                    int bitrate_a = 0;
+                                    float framerate = 0;
+                                    try
+                                    {
+                                        width = int.Parse(this.textBox_enc_width.Text);
+                                        height = int.Parse(this.textBox_enc_height.Text);
+                                        bitrate_v = int.Parse(this.textBox_enc_bitrate_v.Text) * 1000;
+                                        bitrate_a = int.Parse(this.textBox_enc_bitrate_a.Text) * 1000;
+                                        framerate = float.Parse(this.textBox_enc_framerate.Text);
+                                    }
+                                    catch (Exception)
+                                    {
+                                        logoutput("エンコード設定が不正です。再エンコードしません。");
+                                        startInfo.Arguments = String.Format(" -v error -i {0} -c copy -f asf_stream -", url);
+                                    }
+                                    string strsize = String.Format("{0}x{1}", width, height);
+                                    if (width == 0 || height == 0) strsize = "320x240";
+                                    if (bitrate_v == 0) bitrate_v = 256000;
+                                    if (bitrate_a == 0) bitrate_a = 128000;
+                                    if (framerate == 0) framerate = 15;
+
+                                    startInfo.Arguments = String.Format(
+                                        " -v error -i {0} -acodec wmav2 -ab {1} -vcodec wmv2 -vb {2} -s {3} -r {4} -f asf_stream -",
+                                        url,
+                                        bitrate_a,
+                                        bitrate_v,
+                                        strsize,
+                                        framerate);
+                                }
+                            }
+                            //startInfo.Arguments = " -v error -i mmsh://win.global.playstream.com/showcase/mathtv/trig_4.5_350k.wmv -r 15 -s 512x384 -acodec pcm_s16le -vcodec yuv4 -f asf_stream -";
                             startInfo.CreateNoWindow = true;
                             startInfo.RedirectStandardOutput = true;
                             startInfo.RedirectStandardError = true; // 標準エラー
@@ -1131,7 +1178,7 @@ namespace S2MMSH
                                             {
 
                                                 Console.WriteLine("{0} Error code: {1}.", ex.Message, ex.ErrorCode);
-                                                this.BeginInvoke(new Action<String>(delegate(String str) { this.logoutput(ex.Message); }), new object[] { "" });
+                                                this.BeginInvoke(new Action<String>(delegate(String str) { this.logoutput("#2:" + ex.Message); }), new object[] { "" });
                                                 asfData.mmsh_status = MMSH_STATUS.MMSH_STATUS_NULL;
                                             }
                                         }
@@ -1142,14 +1189,14 @@ namespace S2MMSH
                                     }
                                     else // 予期せぬヘッダ
                                     {
-                                        Console.WriteLine("unknown header: {0}", (char)buf[1]);
+                                        Console.WriteLine("#2:unknown header: {0}", (char)buf[1]);
                                     }
 
                                 }
                                 else
                                 {
                                     //EOF
-                                    this.BeginInvoke(new Action<String>(delegate(String str) { this.logoutput("入力がありません。配信を終了します。"); }), new object[] { "" });
+                                    this.BeginInvoke(new Action<String>(delegate(String str) { this.logoutput("#2:入力がありません。配信を終了します。"); }), new object[] { "" });
 
                                     break;
                                 }
@@ -1171,7 +1218,7 @@ namespace S2MMSH
                             //    "エラー",
                             //    MessageBoxButtons.OK,
                             //    MessageBoxIcon.Error);
-                            this.BeginInvoke(new Action<String>(delegate(String str) { this.logoutput(exx.Message); }), new object[] { "" });
+                            this.BeginInvoke(new Action<String>(delegate(String str) { this.logoutput("#2:" + exx.Message); }), new object[] { "" });
 
                             ProcessInitialize();
 
@@ -1207,6 +1254,12 @@ namespace S2MMSH
                     pm.process = null;
                 }
 
+                if (pm.process2 != null)
+                {
+                    pm.process2.Dispose();
+                    pm.process2 = null;
+                }
+
                 if (pm.th_server != null)
                 {
                     pm.server.Close();
@@ -1239,7 +1292,16 @@ namespace S2MMSH
                     if (tmp.IsAlive)
                         tmp.Abort(); // ここでスレッドは終了
                 }
+                if (pm.th_ffmpeg2 != null)
+                {
+                    Thread tmp = pm.th_ffmpeg2;
+                    pm.th_ffmpeg2 = null;
+                    if (tmp.IsAlive)
+                        tmp.Abort(); // ここでスレッドは終了
+                }
             }
+
+
         }
 
         private void p_Exited(object sender, EventArgs e)
@@ -1353,7 +1415,14 @@ namespace S2MMSH
             Process p = (Process)sender;
 
             if (!string.IsNullOrEmpty(e.Data))
-                this.BeginInvoke(new Action<String>(delegate(String str) { this.logoutput(e.Data); }), new object[] { "" }); ;
+                this.BeginInvoke(new Action<String>(delegate(String str) { this.logoutput("#1:" + e.Data); }), new object[] { "" }); ;
+        }
+        private void PrintErrorData2(object sender, DataReceivedEventArgs e)
+        {
+            Process p = (Process)sender;
+
+            if (!string.IsNullOrEmpty(e.Data))
+                this.BeginInvoke(new Action<String>(delegate(String str) { this.logoutput("#2:" + e.Data); }), new object[] { "" }); ;
         }
         private static void NetErrorDataHandler(object sendingProcess,
            DataReceivedEventArgs errLine)
@@ -1498,7 +1567,7 @@ namespace S2MMSH
                 
             }
             else {
-                logoutput("接続は初期化中です。");
+                logoutput("接続は既に初期化されています。");
             }
         }
 
@@ -1686,6 +1755,22 @@ namespace S2MMSH
             if (y == size) return true;
             else return false;
             
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            var obj = (CheckBox)sender;
+            var flg = obj.Checked;
+            if (flg)
+            {
+                //stream2に切り替え
+                logoutputDelegate("#2ストリームに切り替えます。");
+            }
+            else
+            {
+                //stream1に切り替え
+                logoutputDelegate("#1ストリームに切り替えます。");
+            }
         }
 
     }
