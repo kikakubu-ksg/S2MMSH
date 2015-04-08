@@ -20,7 +20,25 @@ namespace S2MMSH
         public ConnectButtonDelegate connectButtonStateDeligate;
         public DisconnectButtonDelegate disconnectButtonStateDeligate;
 
-        public CVC1EncWrapper vc1Enc;
+        public const int nBytes = 65535;
+        public const uint ERR_OK = (uint)0L;
+        public const uint ERR_ENCODER = (uint)-10L;
+        public const uint ERR_INVALIDARG = (uint)-20L;
+        public const uint ERR_INVALIDSETTING = (uint)-30L;
+        public const uint ERR_MEMORY = (uint)-40L;
+        public const uint ERR_POINTER = (uint)-50L;
+        public const uint ERR_ENCODE_STARTED = (uint)-60L;
+        public const uint ERR_IO = (uint)-70L;
+        public const uint ERR_NOANALYZE_FRAME = (uint)-80L;
+        public const uint ERR_NOTCONFIGURED = (uint)-90L;
+        public const uint ERR_NOENCODE_FRAME = (uint)-100L;
+        public const uint ERR_NOMORE_FRAMES = (uint)-110L;
+        public const uint ERR_NO_OP_FRAME = (uint)-120L;
+        public const uint ERR_NOSTART_ANALYZE = (uint)-130L;
+        public const uint ERR_NOSTART_ENCODE = (uint)-140L;
+        public const int TRUE = 1;
+        public const int FALSE = 0;
+
 
         public MainForm()
         {
@@ -160,7 +178,9 @@ namespace S2MMSH
             logoutputDelegate("入力ストリームに接続します。"); 
 
             ProcessManager pm = ProcessManager.Instance;
-            pm.ffmpegstatus = FFMPEG_STATUS.FFMPEG_STATUS_PROCESS;
+            pm.ffmpegstatus = FFMPEG_STATUS.PROCESS;
+
+            CVC1EncWrapper vc1enc = pm.vc1enc;
 
             // init
             this.button_exec.Enabled = false;
@@ -172,41 +192,66 @@ namespace S2MMSH
                 try
                 {
                     /// TODO
-                    vc1Enc = new CVC1EncWrapper();
+                    vc1enc = new CVC1EncWrapper();
                     // VC1enc initialize/configure
                     // パラメータ設定
                     var dBitrate = Double.Parse(this.textBox_enc_bitrate_v.Text);
-                    vc1Enc.SetBitRate(dBitrate);
-                    vc1Enc.SetComplexityLevel(3); // 0-5 0:top quality 5:top performance
-                    vc1Enc.SetQP(8); // 1-31 quantitize paramater
+                    vc1enc.SetBitRate(dBitrate);
+                    vc1enc.SetComplexityLevel(3); // 0-5 0:top quality 5:top performance
+                    vc1enc.SetQP(8); // 1-31 quantitize paramater
                     var dFrameRate = Double.Parse(this.textBox_enc_framerate.Text);
-                    vc1Enc.SetFrameRate(dFrameRate);
-                    vc1Enc.SetInterlacedSource(0); // false
-                    vc1Enc.SetMaxKeyFrameDistance(DWORD dwMaxKeyFrameDistance);
-                    vc1Enc.SetMaxHeight(DWORD dwMaxHeight);
-                    vc1Enc.SetMaxWidth(DWORD dwMaxWidth);
-                    vc1Enc.SetNumOfBFrames(DWORD dwNumOfBFrames);
-                    vc1Enc.SetPeakBitRate(DOUBLE dPeakBitRate);
-                    vc1Enc.SetProfile(DWORD dwProfile);
-                    vc1Enc.SetRateControlMode(DWORD dwRateControlMode);
-                    vc1Enc.SetVBVBufferInBytes(DWORD dwVBVBufferInBytes);
-
-
-
+                    vc1enc.SetFrameRate(dFrameRate);
+                    vc1enc.SetInterlacedSource(FALSE); // false
+                    vc1enc.SetMaxKeyFrameDistance(6); // 最適値不明
+                    var dwMaxHeight = uint.Parse(this.textBox_enc_height.Text);
+                    vc1enc.SetMaxHeight(dwMaxHeight);
+                    var dwMaxWidth = uint.Parse(this.textBox_enc_width.Text);
+                    vc1enc.SetMaxWidth(dwMaxWidth);
+                    vc1enc.SetNumOfBFrames(2); // 最適値不明
+                    vc1enc.SetPeakBitRate(dBitrate);
+                    vc1enc.SetProfile(1); // 0:simple 1:main 2:advanced
+                    vc1enc.SetRateControlMode(1); // 1-pass VBR with fixed QP
+                    vc1enc.SetVBVBufferInBytes((uint)(dBitrate * 5 * 125)); // bitrate x sec x (1000/8)
 
                 }
                 catch (Exception ex)
                 {
                     
-                    logoutputDelegate("パラメータがです。: " + ex.Message);
+                    logoutputDelegate("パラメータがおかしいです。: " + ex.Message);
                     return;
                 }
 
+                // init
+                uint dwError = ERR_OK;
+                dwError = vc1enc.Init();
+
+                if (dwError != ERR_OK) {
+                    logoutputDelegate("VC1エンコーダの初期化に失敗しました。エラーコード : " + dwError );
+                    vc1enc.Destroy();
+                    return;
+                }
+                // advance option set
+                dwError = vc1enc.SetClosedEntryPoint(TRUE); // ForceKeyFrame用
+                if (dwError != ERR_OK)
+                {
+                    logoutputDelegate("VC1エンコーダの設定に失敗しました。エラーコード : " + dwError);
+                    vc1enc.Destroy();
+                    return;
+                }
+                dwError = vc1enc.SetLookAhead(TRUE); // B frame用
+                if (dwError != ERR_OK)
+                {
+                    logoutputDelegate("VC1エンコーダの設定に失敗しました。エラーコード : " + dwError);
+                    vc1enc.Destroy();
+                    return;
+                }
+
+                pm.vc1encstatus = VC1ENC_STATUS.STARTED;
                 
             }
 
 
-            if (!push_mode)
+            if (!push_mode) // pullの場合サーバを立てる
             {
                 // httpserver listening
                 pm.th_server = new Thread(
@@ -278,10 +323,10 @@ namespace S2MMSH
                                         startInfo.Arguments = String.Format(" -v error -i {0} -c copy -f asf_stream -", url);
                                     }
                                     string strsize = String.Format("{0}x{1}", width, height);
-                                    if (width == 0 || height == 0) strsize = "320x240";
-                                    if (bitrate_v == 0) bitrate_v = 256000;
-                                    if (bitrate_a == 0) bitrate_a = 128000;
-                                    if (framerate == 0) framerate = 15;
+                                    //if (width == 0 || height == 0) strsize = "320x240";
+                                    //if (bitrate_v == 0) bitrate_v = 256000;
+                                    //if (bitrate_a == 0) bitrate_a = 128000;
+                                    //if (framerate == 0) framerate = 15;
 
                                     startInfo.Arguments = String.Format(
                                         // " -v error -i {0} -acodec wmav2 -ab {1} -vcodec wmv2 -vb {2} -s {3} -r {4} -f asf_stream -",
@@ -313,7 +358,7 @@ namespace S2MMSH
 
                             int c = 0; // peyload size
                             int h = 0; // header object size
-                            const int nBytes = 65535;
+                            
                             byte[] buf = new byte[nBytes];
                             
                             // 標準出力はこのスレッドでとる
@@ -415,11 +460,12 @@ namespace S2MMSH
                                         {
                                             //this.textBox_log.AppendText(ex.Message);
                                             //break;
-                                            bitrate = 256000;
-                                            audiorate = 128000;
+                                            //bitrate = 256000;
+                                            //audiorate = 128000;
+                                            throw new Exception("ビットレートが不正です。");
                                         }
-                                        if (bitrate == 0) bitrate = 256000;
-                                        if (audiorate == 0) audiorate = 128000;
+                                        //if (bitrate == 0) bitrate = 256000;
+                                        //if (audiorate == 0) audiorate = 128000;
 
                                         // Stream Bitrate Properties Object
 
@@ -839,7 +885,7 @@ namespace S2MMSH
                                         }
                                         dist.CopyTo(asfData.asf_header, 0);
                                         Console.WriteLine("ASF header registered.");
-                                        asfData.asf_status = ASF_STATUS.ASF_STATUS_SET_HEADER;
+                                        asfData.asf_status = ASF_STATUS.SET_HEADER;
 
                                         this.BeginInvoke(new Action<String>(delegate(String str) { this.logoutput("ASFヘッダを登録しました。"); }), new object[] { "" });
                                         if (push_mode)
@@ -966,7 +1012,7 @@ namespace S2MMSH
                                                 // MMSソケット登録
                                                 asfData.mms_sock = mClient;
                                                 // ステータス更新
-                                                asfData.mmsh_status = MMSH_STATUS.MMSH_STATUS_ASF_HEADER_SEND;
+                                                asfData.mmsh_status = MMSH_STATUS.ASF_HEADER_SEND;
 
                                             }
                                             else
@@ -984,8 +1030,8 @@ namespace S2MMSH
                                     else if (buf[1] == 'D')
                                     { // Headerではない場合
                                         if ( 
-                                        asfData.mmsh_status == MMSH_STATUS.MMSH_STATUS_ASF_HEADER_SEND
-                                        || asfData.mmsh_status == MMSH_STATUS.MMSH_STATUS_ASF_DATA_SENDING
+                                        asfData.mmsh_status == MMSH_STATUS.ASF_HEADER_SEND
+                                        || asfData.mmsh_status == MMSH_STATUS.ASF_DATA_SENDING
                                         )
                                         {
                                             try
@@ -1005,7 +1051,7 @@ namespace S2MMSH
                                                         byte[] dist = new byte[65535];
                                                         int size = deleteMmsPreHeader(buf, c + 4, ref dist);
                                                         asfData.mms_sock.Send(dist, size + 4, SocketFlags.None);
-                                                        asfData.mmsh_status = MMSH_STATUS.MMSH_STATUS_ASF_DATA_SENDING;
+                                                        asfData.mmsh_status = MMSH_STATUS.ASF_DATA_SENDING;
 
                                                     }
                                                     else
@@ -1014,7 +1060,7 @@ namespace S2MMSH
                                                         asfData.mms_sock.Send(buf, c + 4, SocketFlags.None);
 
                                                         //Console.WriteLine("ASF Data sent.");
-                                                        asfData.mmsh_status = MMSH_STATUS.MMSH_STATUS_ASF_DATA_SENDING;
+                                                        asfData.mmsh_status = MMSH_STATUS.ASF_DATA_SENDING;
                                                            
                                                     }
                                                 }
@@ -1024,7 +1070,7 @@ namespace S2MMSH
 
                                                 Console.WriteLine("{0} Error code: {1}.", ex.Message, ex.ErrorCode);
                                                 this.BeginInvoke(new Action<String>(delegate(String str) { this.logoutput(ex.Message); }), new object[] { "" });
-                                                asfData.mmsh_status = MMSH_STATUS.MMSH_STATUS_NULL;
+                                                asfData.mmsh_status = MMSH_STATUS.NULL;
                                             }
                                         }
                                         //else
@@ -1083,9 +1129,9 @@ namespace S2MMSH
         {
             ProcessManager pm = ProcessManager.Instance;
 
-            if (pm.ffmpegstatus == FFMPEG_STATUS.FFMPEG_STATUS_PROCESS) // 初期化
+            if (pm.ffmpegstatus == FFMPEG_STATUS.PROCESS) // 初期化
             {
-                pm.ffmpegstatus = FFMPEG_STATUS.FFMPEG_STATUS_INITIALIZING;
+                pm.ffmpegstatus = FFMPEG_STATUS.INITIALIZING;
                 //this.button_disconnect.Enabled = false;
                 //disconnectButtonStateDeligate(false);
                 this.BeginInvoke(new Action<Boolean>(delegate(Boolean bl) { this.disconnectButtonStateDeligate(false); }), new object[] { false });
@@ -1105,11 +1151,11 @@ namespace S2MMSH
 
                 // 初期化
                 AsfData asfData = AsfData.Instance;
-                asfData.asf_status = ASF_STATUS.ASF_STATUS_NULL;
+                asfData.asf_status = ASF_STATUS.NULL;
                 asfData.asf_header_size = 0;
                 asfData.asf_header = new byte[65535];
                 asfData.mms_sock = null;
-                asfData.mmsh_status = MMSH_STATUS.MMSH_STATUS_NULL;
+                asfData.mmsh_status = MMSH_STATUS.NULL;
 
                 //this.button_exec.Enabled = true;
                 //connectButtonStateDeligate(true);
@@ -1117,7 +1163,7 @@ namespace S2MMSH
 
                 this.BeginInvoke(new Action<String>(delegate(String str) { this.logoutput("接続を初期化しました。"); }), new object[] { "" });
 
-                pm.ffmpegstatus = FFMPEG_STATUS.FFMPEG_STATUS_INITIALIZED;
+                pm.ffmpegstatus = FFMPEG_STATUS.INITIALIZED;
 
                 // スレッド自身の削除
                 if (pm.th_ffmpeg != null)
@@ -1135,7 +1181,7 @@ namespace S2MMSH
             //プロセスが終了したときに実行される
             logoutput("ffmpegが終了しました。");
             ProcessManager pm = ProcessManager.Instance;
-            if (pm.ffmpegstatus == FFMPEG_STATUS.FFMPEG_STATUS_PROCESS) // 初期化
+            if (pm.ffmpegstatus == FFMPEG_STATUS.PROCESS) // 初期化
             {
                 //pm.ffmpegstatus = FFMPEG_STATUS.FFMPEG_STATUS_INITIALIZING;
                 //logoutput("接続を初期化します。");
@@ -1163,18 +1209,18 @@ namespace S2MMSH
 
                 // 初期化
                 AsfData asfData = AsfData.Instance;
-                asfData.asf_status = ASF_STATUS.ASF_STATUS_NULL;
+                asfData.asf_status = ASF_STATUS.NULL;
                 asfData.asf_header_size = 0;
                 asfData.asf_header = new byte[65535];
                 asfData.mms_sock = null;
-                asfData.mmsh_status = MMSH_STATUS.MMSH_STATUS_NULL;
+                asfData.mmsh_status = MMSH_STATUS.NULL;
 
                 this.button_exec.Enabled = true;
                 this.button_exec_push.Enabled = true;
 
                 logoutput("接続を初期化しました。");
 
-                pm.ffmpegstatus = FFMPEG_STATUS.FFMPEG_STATUS_INITIALIZED;
+                pm.ffmpegstatus = FFMPEG_STATUS.INITIALIZED;
             }
             else
             {
@@ -1188,7 +1234,7 @@ namespace S2MMSH
             //プロセスが終了したときに実行される
             logoutput("ffmpegが終了しました。");
             ProcessManager pm = ProcessManager.Instance;
-            if (pm.ffmpegstatus == FFMPEG_STATUS.FFMPEG_STATUS_PROCESS) // 初期化
+            if (pm.ffmpegstatus == FFMPEG_STATUS.PROCESS) // 初期化
             {
                 //pm.ffmpegstatus = FFMPEG_STATUS.FFMPEG_STATUS_INITIALIZING;
                 //logoutput("接続を初期化します。");
@@ -1266,7 +1312,7 @@ namespace S2MMSH
             while (pm.serverstatus)
             {
                 Socket sock = null;
-                if (asfData.asf_status == ASF_STATUS.ASF_STATUS_SET_HEADER) this.BeginInvoke(new Action<String>(delegate(String str) { this.logoutput("クライアント接続を受け付けます。"); }), new object[] { "" });
+                if (asfData.asf_status == ASF_STATUS.SET_HEADER) this.BeginInvoke(new Action<String>(delegate(String str) { this.logoutput("クライアント接続を受け付けます。"); }), new object[] { "" });
                 try
                 {
                     sock = pm.server.Accept();
@@ -1353,7 +1399,7 @@ namespace S2MMSH
         private void button_disconnect_Click(object sender, EventArgs e)
         {
             ProcessManager pm = ProcessManager.Instance;
-            if (pm.ffmpegstatus == FFMPEG_STATUS.FFMPEG_STATUS_PROCESS) // 初期化
+            if (pm.ffmpegstatus == FFMPEG_STATUS.PROCESS) // 初期化
             {
                 //pm.ffmpegstatus = FFMPEG_STATUS.FFMPEG_STATUS_INITIALIZING;
                 //logoutput("接続を初期化します。");
@@ -1560,6 +1606,65 @@ namespace S2MMSH
 
 
             return c - 12;
+        }
+
+        /// <summary>
+        /// バイト列削除・挿入
+        /// </summary>
+        /// <param name="buf">対象バイト列</param>
+        /// <param name="psize">パケット長</param>
+        /// <param name="insbuf">挿入バイト列</param>
+        /// <param name="dsize">削除バイト数</param>
+        /// <param name="offset">挿入位置</param>
+        /// <returns>ヘッダ長</returns>
+        private int bitInsDel(ref byte[] buf, int psize, byte[] insbuf, int dsize, int offset)
+        {
+            int isize = insbuf.Length;
+            int diff = isize - dsize;
+
+            // 挿入後の配列長がオーバーする場合はエラー
+            if (nBytes < psize + diff || psize + diff < 0)
+            {
+                return -1;
+            }
+
+            if (isize > dsize)
+            {
+                // 後ろにコピー
+                for (int i = 0; i < psize - offset - dsize; i++)
+                {
+                    buf[psize + diff - 1 - i] = buf[psize - 1 - i];
+                }
+            }
+            else if (dsize > isize)
+            {
+                // 前にコピー
+                for (int i = 0; i < psize - offset - dsize; i++)
+                {
+                    buf[offset + isize + i] = buf[offset + dsize + i];
+                }
+            }
+
+            // 挿入
+            for (int i = 0; i < isize; i++)
+            {
+                buf[offset + i] = insbuf[i];
+            }
+
+            return psize - 4 + diff;
+        }
+
+        /// <summary>
+        /// バイト列挿入
+        /// </summary>
+        /// <param name="buf">対象バイト列</param>
+        /// <param name="psize">パケット長</param>
+        /// <param name="insbuf">挿入バイト列</param>
+        /// <param name="offset">挿入位置</param>
+        /// <returns>ヘッダ長</returns>
+        private int bitInsert(ref byte[] buf, int psize, byte[] insbuf, int offset)
+        {
+            return bitInsDel(ref buf, psize, insbuf, 0, offset);
         }
 
         private Boolean compBinaryList(byte[] buf, int c, byte[] stream, int d, int size)

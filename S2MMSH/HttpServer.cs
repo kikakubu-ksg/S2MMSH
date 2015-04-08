@@ -68,8 +68,8 @@ namespace S2MMSH
                 String httpHeader = null;
                 byte[] httpHeaderBuffer = new byte[4096];
 
-                if (asfData.asf_status == ASF_STATUS.ASF_STATUS_SET_HEADER && // asfヘッダ登録済み
-                    asfData.mmsh_status != MMSH_STATUS.MMSH_STATUS_ASF_DATA_SENDING) // クライアントなし
+                if (asfData.asf_status == ASF_STATUS.SET_HEADER && // asfヘッダ登録済み
+                    asfData.mmsh_status != MMSH_STATUS.ASF_DATA_SENDING) // クライアントなし
                 {
                     if (message.Contains("stream-switch"))
                     {
@@ -93,7 +93,7 @@ namespace S2MMSH
                             Console.WriteLine("ASF header sent.");
                         }
                         asfData.mms_sock = mClient; //早い者勝ち
-                        asfData.mmsh_status = MMSH_STATUS.MMSH_STATUS_ASF_HEADER_SEND;
+                        asfData.mmsh_status = MMSH_STATUS.ASF_HEADER_SEND;
                     }
                     else if (message.Contains("NSPlayer"))
                     {
@@ -142,7 +142,7 @@ namespace S2MMSH
                         //if(true)
                         //{
                         asfData.mms_sock = mClient;
-                        asfData.mmsh_status = MMSH_STATUS.MMSH_STATUS_ASF_HEADER_SEND;
+                        asfData.mmsh_status = MMSH_STATUS.ASF_HEADER_SEND;
                         //}
                         //else
                         //{
@@ -174,7 +174,7 @@ namespace S2MMSH
                         mClient.Close();
                         asfData.mms_sock = null;
                     }
-                    asfData.mmsh_status = MMSH_STATUS.MMSH_STATUS_NULL;
+                    asfData.mmsh_status = MMSH_STATUS.NULL;
                 }
 
             }

@@ -12,35 +12,42 @@ namespace S2MMSH
 {
     public enum ASF_STATUS
     {
-        ASF_STATUS_NULL,               // 初期状態
-        ASF_STATUS_SET_HEADER          // ASFヘッダ作成済み
+        NULL,               // 初期状態
+        SET_HEADER          // ASFヘッダ作成済み
     };
 
     public enum MMSH_STATUS
     {
-        MMSH_STATUS_NULL,               // 初期状態
-        MMSH_STATUS_CONNECTED,          // 
-        MMSH_STATUS_HTTP_HEADER_SEND,
-        MMSH_STATUS_ASF_HEADER_SEND,
-        MMSH_STATUS_ASF_DATA_SENDING
+        NULL,               // 初期状態
+        CONNECTED,          // 
+        HTTP_HEADER_SEND,
+        ASF_HEADER_SEND,
+        ASF_DATA_SENDING
     };
 
     public enum FFMPEG_STATUS
     {
-        FFMPEG_STATUS_NULL,               // 初期状態
-        FFMPEG_STATUS_INITIALIZED,        // 初期化済
-        FFMPEG_STATUS_INITIALIZING,        // 初期化中
-        FFMPEG_STATUS_PROCESS              // 処理中
+        NULL,               // 初期状態
+        INITIALIZED,        // 初期化済
+        INITIALIZING,        // 初期化中
+        PROCESS              // 処理中
+    };
+
+    public enum VC1ENC_STATUS
+    {
+        NULL,               // 初期状態
+        STARTED,            // StartEnc済み
+        SET_HEADER          // ASFヘッダ書き換え済み
     };
 
     public sealed class AsfData
     {
         private static AsfData m_Instance = new AsfData();
-        public ASF_STATUS asf_status = ASF_STATUS.ASF_STATUS_NULL;
+        public ASF_STATUS asf_status = ASF_STATUS.NULL;
         public int asf_header_size = 0;
         public byte[] asf_header = new byte[65535];
         public Socket mms_sock = null;
-        public MMSH_STATUS mmsh_status = MMSH_STATUS.MMSH_STATUS_NULL;
+        public MMSH_STATUS mmsh_status = MMSH_STATUS.NULL;
 
         private AsfData()
         {
@@ -62,6 +69,7 @@ namespace S2MMSH
 
     }
 
+    // singleton
     public sealed class ProcessManager
     {
         private static ProcessManager m_Instance = new ProcessManager();
@@ -70,7 +78,10 @@ namespace S2MMSH
         public Thread th_ffmpeg = null;
         public Boolean serverstatus = true;
         public Socket server = null;
-        public FFMPEG_STATUS ffmpegstatus = FFMPEG_STATUS.FFMPEG_STATUS_NULL;
+        public FFMPEG_STATUS ffmpegstatus = FFMPEG_STATUS.NULL;
+
+        public CVC1EncWrapper vc1enc = null;
+        public VC1ENC_STATUS vc1encstatus = VC1ENC_STATUS.NULL;
 
         public Thread th_ffmpeg2 = null;
         public Process process2 = null;
@@ -93,4 +104,5 @@ namespace S2MMSH
             Console.WriteLine("DoSomething is called");
         }
     }
+
 }
