@@ -390,27 +390,28 @@ namespace S2MMSH
                                         // ストリーム番号を取得する
 
                                         // Stream Properties Object
-                                        byte[] stream_properties_object =
+                                        var stream_properties_object =
                                             new byte[]{
                                                 0x91, 0x07, 0xDC, 0xB7, 0xB7, 0xA9, 0xCF, 0x11,
                                                 0x8E, 0xE6, 0x00, 0xC0, 0x0C, 0x20, 0x53, 0x65
                                             };
 
-                                        byte[] stream_type_video =
+                                        var stream_type_video =
                                             new byte[]{
                                                 0xC0, 0xEF, 0x19, 0xBC, 0x4D, 0x5B, 0xCF, 0x11,
                                                 0xA8, 0xFD, 0x00, 0x80, 0x5F, 0x5C, 0x44, 0x2B
                                             };
 
-                                        byte[] stream_type_audio =
+                                        var stream_type_audio =
                                             new byte[]{
                                                 0x40, 0x9E, 0x69, 0xF8, 0x4D, 0x5B, 0xCF, 0x11,
                                                 0xA8, 0xFD, 0x00, 0x80, 0x5F, 0x5C, 0x44, 0x2B
                                             };
 
-                                        int[] stream_num = new int[8];
-                                        int[] stream_type = new int[8];
-                                        int stream_amount = 0;
+                                        var stream_num = new int[8];
+                                        var stream_type = new int[8];
+                                        var stream_addr = new int[8];
+                                        int stream_count = 0;
 
                                         // オブジェクトの場所を見つける
                                         for (int spo_j = 0; spo_j < c; spo_j++)
@@ -428,26 +429,72 @@ namespace S2MMSH
                                             {
                                                 if (compBinaryList(buf, spo_j + 24, stream_type_video, 0, 16))
                                                 {
-                                                    stream_num[stream_amount] = buf[spo_j + 72];
-                                                    stream_type[stream_amount] = 1;
-                                                    stream_amount++;
+                                                    stream_addr[stream_count] = spo_j; // オブジェクト位置
+                                                    stream_num[stream_count] = buf[spo_j + 72];
+                                                    stream_type[stream_count] = 1;
+                                                    stream_count++;
                                                 }
                                                 else if (compBinaryList(buf, spo_j + 24, stream_type_audio, 0, 16))
                                                 {
-                                                    stream_num[stream_amount] = buf[spo_j + 72];
-                                                    stream_type[stream_amount] = 2;
-                                                    stream_amount++;
+                                                    stream_num[stream_count] = buf[spo_j + 72];
+                                                    stream_type[stream_count] = 2;
+                                                    stream_count++;
                                                 }
 
                                                 //break;
                                             }
                                         }
 
-                                        if (stream_amount == 0)
+                                        if (stream_count == 0)
                                         {
                                             this.BeginInvoke(new Action<String>(delegate(String str) { this.logoutput("有効なストリームがありません。"); }), new object[] { "" });
                                             break;
                                         }
+
+                                        // VC1ヘッダ修正処理
+                                        if (this.radioButton_reencode_1.Checked)
+                                        {
+                                            Debug.Assert(vc1enc == null);
+                                            /// TODO
+                                            for(int i = 0 ; i < stream_count ; i++)
+                                            {
+                                                if (stream_type[i] == 1) // video
+                                                {
+                                                    // fourCCを書き換える
+                                                    var addr = stream_addr[i];
+                                                    if (vc1enc.GetProfile() == 2) // advanced
+                                                    {
+                                                        buf[addr + 105] = (byte)'W';
+                                                        buf[addr + 106] = (byte)'V';
+                                                        buf[addr + 107] = (byte)'C';
+                                                        buf[addr + 108] = (byte)'1';
+                                                    }
+                                                    else
+                                                    {
+                                                        buf[addr + 105] = (byte)'W';
+                                                        buf[addr + 106] = (byte)'M';
+                                                        buf[addr + 107] = (byte)'V';
+                                                        buf[addr + 108] = (byte)'3';
+                                                    }
+                                                    // ImageSizeを0にする
+                                                    buf[addr + 93] = 0;
+                                                    buf[addr + 94] = 0;
+                                                    buf[addr + 95] = 0;
+                                                    buf[addr + 96] = 0;
+
+                                                    // プライベートコーデック情報を追加する
+                                                    var pcd = vc1enc.Get
+
+                                                    break; // 最初のvideostreamのみ変換
+                                                }
+                                            }
+                                            /// 
+                                            
+                                            
+                                            /// ビットレート情報などを書き換える
+                                            /// あとコーデック情報とか書き換えておく（おそらく取得可能）
+                                        }// if (this.radioButton_reencode_1.Checked)
+
                                         //bitrate property
                                         int bitrate;
                                         int audiorate;
@@ -469,17 +516,17 @@ namespace S2MMSH
 
                                         // Stream Bitrate Properties Object
 
-                                        byte[] bitrate_property_head =
+                                        var bitrate_property_head =
                                             new byte[]{
                                                 0xCE, 0x75, 0xF8, 0x7B, 0x8D, 0x46, 0xD1, 0x11,
                                                 0x8D, 0x82, 0x00, 0x60, 0x97, 0xC9, 0xA2, 0xB2,
-                                                (byte)(26+6*stream_amount), 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                                (byte)stream_amount, 0x00 //Bitrate Records Count
+                                                (byte)(26+6*stream_count), 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                                (byte)stream_count, 0x00 //Bitrate Records Count
                                             };
 
-                                        ArrayList list1 = new ArrayList(bitrate_property_head);
+                                        var list1 = new ArrayList(bitrate_property_head);
 
-                                        for (int bph_i = 0; bph_i < stream_amount; bph_i++)
+                                        for (int bph_i = 0; bph_i < stream_count; bph_i++)
                                         {
 
                                             if (stream_type[bph_i] == 1) // video
@@ -537,7 +584,7 @@ namespace S2MMSH
 
                                         if (pflg)
                                         {
-                                            byte[] data50 = new byte[50];
+                                            var data50 = new byte[50];
                                             int i;
                                             for (i = 0; i < 50; i++)
                                             {
@@ -581,7 +628,7 @@ namespace S2MMSH
                                         int content_description_object_size = 34 + Title_length + Auther_length + Copyright_length + Description_length + Rating_length;
 
                                         // Content Description Object
-                                        byte[] content_description_object =
+                                        var content_description_object =
                                             new byte[]{
                                                 0x33, 0x26, 0xB2, 0x75, 0x8E, 0x66, 0xCF, 0x11,
                                                 0xA6, 0xD9, 0x00, 0xAA, 0x00, 0x62, 0xCE, 0x6C,
@@ -606,8 +653,7 @@ namespace S2MMSH
                                             };
 
 
-                                        System.Collections.Generic.List<byte> mergedList =
-                                            new System.Collections.Generic.List<byte>(content_description_object_size);
+                                        var mergedList = new System.Collections.Generic.List<byte>(content_description_object_size);
 
                                         mergedList.AddRange(content_description_object);
                                         mergedList.AddRange(title);
@@ -642,7 +688,7 @@ namespace S2MMSH
 
                                         if (pflg2)
                                         {
-                                            byte[] data50 = new byte[50];
+                                            var data50 = new byte[50];
                                             int i;
                                             for (i = 0; i < 50; i++)
                                             {
@@ -672,7 +718,7 @@ namespace S2MMSH
                                         // 何も入ってない状態を前提とする
 
                                         // Header Extension Object 場所特定 
-                                        byte[] header_extension_object =
+                                        var header_extension_object =
                                             new byte[]{
                                                 0xB5, 0x03, 0xBF, 0x5F, 0x2E, 0xA9, 0xCF, 0x11,
                                                 0x8E, 0xE3, 0x00, 0xC0, 0x0C, 0x20, 0x53, 0x65
@@ -697,7 +743,7 @@ namespace S2MMSH
                                         }
 
                                         // Extended Stream Properties Object 作成
-                                        byte[] extended_stream_properties_object =
+                                        var extended_stream_properties_object =
                                             new byte[]{
                                                 0xCB, 0xA5, 0xE6, 0x14, 0x72, 0xC6, 0x32, 0x43,
                                                 0x83, 0x99, 0xA9, 0x69, 0x52, 0x06, 0x5B, 0x5A
@@ -705,7 +751,7 @@ namespace S2MMSH
 
                                         mergedList = new System.Collections.Generic.List<byte>();
 
-                                        for (int i = 0; i < stream_amount; i++)
+                                        for (int i = 0; i < stream_count; i++)
                                         {
                                             if (stream_type[i] == 1) // video
                                             {
@@ -804,25 +850,25 @@ namespace S2MMSH
 
                                         // File Properties Object にGUIDを設定する
                                         // GUIDを生成
-                                        byte[] s2mmsh_guid = Guid.NewGuid().ToByteArray();
+                                        var s2mmsh_guid = Guid.NewGuid().ToByteArray();
                                         // 末尾FF固定
                                         // s2mmsh_guid[15] = 0xFF;
 
                                         // グリニッジ標準の現在時刻
-                                        DateTime dtNow = DateTime.Now.ToUniversalTime();
+                                        var dtNow = DateTime.Now.ToUniversalTime();
 
                                         // グリニッジ標準の開始時刻
-                                        DateTime dtEpoc = new DateTime(1601, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                                        var dtEpoc = new DateTime(1601, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
                                         // グリニッジ経過時刻を取得
-                                        TimeSpan tsEpoc = dtNow.Subtract(dtEpoc);
+                                        var tsEpoc = dtNow.Subtract(dtEpoc);
 
-                                        Int64 tm = Convert.ToInt64(tsEpoc.TotalMilliseconds * 10000); // 100ナノ秒
+                                        var tm = Convert.ToInt64(tsEpoc.TotalMilliseconds * 10000); // 100ナノ秒
                                         //Int64 tm = 1;
-                                        byte[] starttime = BitConverter.GetBytes(tm);
+                                        var starttime = BitConverter.GetBytes(tm);
 
                                         // File Properties Object
-                                        byte[] file_properties_object =
+                                        var file_properties_object =
                                             new byte[]{
                                                 0xA1, 0xDC, 0xAB, 0x8C, 0x47, 0xA9, 0xCF, 0x11,
                                                 0x8E, 0xE4, 0x00, 0xC0, 0x0C, 0x20, 0x53, 0x65
@@ -861,18 +907,8 @@ namespace S2MMSH
                                             buf[c + 4 - 1 - 10 - m] = s2mmsh_guid[15 - m];
                                         }
 
-                                        // VC1ヘッダ修正処理
-                                        if (this.radioButton_reencode_1.Checked)
-                                        {
-                                            /// TODO
-                                            /// プライベートコーデック情報を書き換える
-                                            /// fourCCを書き換える
-                                            /// ビットレート情報などを書き換える
-                                            /// あとコーデック情報とか書き換えておく（おそらく取得可能）
-                                        }// if (this.radioButton_reencode_1.Checked)
 
-
-                                        byte[] dist = new byte[65535];
+                                        var dist = new byte[nBytes];
                                         if (push_mode)
                                         {
                                             asfData.asf_header_size = deleteMmsPreHeader(buf, c + 4, ref dist) + 4;
@@ -908,9 +944,9 @@ namespace S2MMSH
                                             int port = int.Parse(m.Groups[2].Value);
 
                                             IPAddress ipaddress = null;
-                                            IPHostEntry ipentry = Dns.GetHostEntry(host);
+                                            var ipentry = Dns.GetHostEntry(host);
 
-                                            foreach (IPAddress ip in ipentry.AddressList)
+                                            foreach (var ip in ipentry.AddressList)
                                             {
                                                 if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
                                                 {
@@ -923,11 +959,11 @@ namespace S2MMSH
                                                 this.BeginInvoke(new Action<String>(delegate(String str) { this.logoutput("接続先アドレスが不正です。"); }), new object[] { "" });
                                                 break;
                                             }
-                                            IPEndPoint RHost = new IPEndPoint(ipaddress, port);
-                                            Socket mClient = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                                            var RHost   = new IPEndPoint(ipaddress, port);
+                                            var mClient = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                                             mClient.Connect(RHost);
 
-                                            String httpHeader = String.Format(
+                                            var httpHeader = String.Format(
                                                 "POST / HTTP/1.1\r\n" +
                                                 "Content-Type: application/x-wms-pushsetup\r\n" +
                                                 "X-Accept-Authentication: Negotiate, NTLM, Digest\r\n" +
@@ -941,11 +977,11 @@ namespace S2MMSH
                                                 //, asfData.asf_header_size
                                             );
 
-                                            byte[] httpHeaderBuffer = Encoding.UTF8.GetBytes(httpHeader);
+                                            var httpHeaderBuffer = Encoding.UTF8.GetBytes(httpHeader);
                                             mClient.Send(httpHeaderBuffer);
                                             while (mClient.Available <= 0) ;
 
-                                            byte[] buffer = new byte[(int)mClient.ReceiveBufferSize];
+                                            var buffer = new byte[(int)mClient.ReceiveBufferSize];
 
                                             int recvLen = 0;
                                             try
@@ -970,7 +1006,7 @@ namespace S2MMSH
                                             {
                                             }
                                             this.BeginInvoke(new Action<String>(delegate(String str) { this.logoutput(msg); }), new object[] { "" });
-                                            String message = Encoding.ASCII.GetString(buffer, 0, recvLen);
+                                            var message = Encoding.ASCII.GetString(buffer, 0, recvLen);
                                             Console.Write("httprequest:" + message);
 
                                             if (message.Contains("HTTP/1.1 204"))
@@ -980,7 +1016,7 @@ namespace S2MMSH
                                                 new System.Text.RegularExpressions.Regex(
                                                      @"push-id=([0-9]+)");
                                                 m = r.Match(message);
-                                                String pushid = m.Groups[1].Value;
+                                                var pushid = m.Groups[1].Value;
 
                                                 httpHeader = String.Format(
                                                     "POST / HTTP/1.1\r\n" +
@@ -1048,7 +1084,7 @@ namespace S2MMSH
                                                     if (push_mode)
                                                     //if (false)
                                                     {
-                                                        byte[] dist = new byte[65535];
+                                                        var dist = new byte[65535];
                                                         int size = deleteMmsPreHeader(buf, c + 4, ref dist);
                                                         asfData.mms_sock.Send(dist, size + 4, SocketFlags.None);
                                                         asfData.mmsh_status = MMSH_STATUS.ASF_DATA_SENDING;
@@ -1127,7 +1163,7 @@ namespace S2MMSH
         /// </summary>
         private void ProcessInitialize()
         {
-            ProcessManager pm = ProcessManager.Instance;
+            var pm = ProcessManager.Instance;
 
             if (pm.ffmpegstatus == FFMPEG_STATUS.PROCESS) // 初期化
             {
@@ -1180,7 +1216,7 @@ namespace S2MMSH
         {
             //プロセスが終了したときに実行される
             logoutput("ffmpegが終了しました。");
-            ProcessManager pm = ProcessManager.Instance;
+            var pm = ProcessManager.Instance;
             if (pm.ffmpegstatus == FFMPEG_STATUS.PROCESS) // 初期化
             {
                 //pm.ffmpegstatus = FFMPEG_STATUS.FFMPEG_STATUS_INITIALIZING;
@@ -1208,10 +1244,10 @@ namespace S2MMSH
                 }
 
                 // 初期化
-                AsfData asfData = AsfData.Instance;
+                var asfData = AsfData.Instance;
                 asfData.asf_status = ASF_STATUS.NULL;
                 asfData.asf_header_size = 0;
-                asfData.asf_header = new byte[65535];
+                asfData.asf_header = new byte[nBytes];
                 asfData.mms_sock = null;
                 asfData.mmsh_status = MMSH_STATUS.NULL;
 
